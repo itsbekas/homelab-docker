@@ -15,4 +15,4 @@ include:
   - ./qbittorrent/docker-compose.yml
   - ./radarr/docker-compose.yml
   - ./sonarr/docker-compose.yml
-  # - ./telegraf/docker-compose.yml
+  - ./telegraf/docker-compose.yml
