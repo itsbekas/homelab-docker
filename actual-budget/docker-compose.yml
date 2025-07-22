@@ -1,0 +1,15 @@
+services:
+  actual-budget:
+    image: ghcr.io/actualbudget/actual-server:latest
+    container_name: actual-budget
+    ports:
+      - 5006:5006
+    volumes:
+      - /opt/docker/actual-budget/data:/data
+    healthcheck:
+      test: ['CMD-SHELL', 'node src/scripts/health-check.js']
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped

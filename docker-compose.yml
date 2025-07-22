@@ -1,0 +1,18 @@
+include:
+  - ./actual-budget/docker-compose.yml
+  - ./bazarr/docker-compose.yml
+  - ./flaresolverr/docker-compose.yml
+  - ./gluetun/docker-compose.yml
+  - ./grafana/docker-compose.yml
+  - ./homeassistant/docker-compose.yml
+  # - ./influxdb/docker-compose.yml
+  - ./jellyfin/docker-compose.yml
+  - ./jellyseerr/docker-compose.yml
+  - ./mosquitto/docker-compose.yml
+  - ./portainer/docker-compose.yml
+  - ./prometheus/docker-compose.yml
+  - ./prowlarr/docker-compose.yml
+  - ./qbittorrent/docker-compose.yml
+  - ./radarr/docker-compose.yml
+  - ./sonarr/docker-compose.yml
+  # - ./telegraf/docker-compose.yml

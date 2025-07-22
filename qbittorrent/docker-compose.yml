@@ -1,0 +1,20 @@
+services:
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+      - WEBUI_PORT=6880
+      - TORRENTING_PORT=6881
+    volumes:
+      - /opt/docker/qbittorrent/appdata:/config
+      - /data/downloads:/data/downloads
+    # Ports will be handled by gluetun, so they are commented out.
+    # ports:
+    #   - 6880:6880
+    #   - 6881:6881
+    #   - 6881:6881/udp
+    network_mode: "container:gluetun"
+    restart: unless-stopped

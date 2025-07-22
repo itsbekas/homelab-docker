@@ -1,0 +1,13 @@
+services:
+  telegraf:
+    image: telegraf
+    container_name: telegraf
+    environment:
+      - MQTT_USERNAME=${MQTT_USERNAME}
+      - MQTT_PASSWORD=${MQTT_PASSWORD}
+    volumes:
+      - /opt/docker/telegraf/config/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    restart: unless-stopped
+
+# References
+# https://www.influxdata.com/blog/telegraf-deployment-strategies-docker-compose/

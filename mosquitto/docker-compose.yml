@@ -1,0 +1,17 @@
+services:
+  mosquitto:
+    image: eclipse-mosquitto
+    container_name: mosquitto
+    ports:
+      - 1883:1883
+      - 5007:8080
+    volumes:
+        - /opt/docker/mosquitto/config:/mosquitto/config
+        - /opt/docker/mosquitto/data:/mosquitto/data
+        - /opt/docker/mosquitto/log:/mosquitto/log
+    environment:
+      - TZ=Europe/London
+    restart: unless-stopped
+
+# References
+# https://hub.docker.com/_/eclipse-mosquitto
