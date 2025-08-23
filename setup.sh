@@ -24,7 +24,6 @@ sudo chmod -R a=,a+rX,u+w,g+w /data
 
 # Replace env variables in glance config
 weather_location=$(grep '^WEATHER_LOCATION=' /opt/docker/glance/.env | cut -d'=' -f2-)
-echo $weather_location
 if [ -n "$weather_location" ]; then
     sed -i "s|\$WEATHER_LOCATION|$weather_location|g" /opt/docker/glance/config/home.yml
 fi
