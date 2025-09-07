@@ -4,7 +4,7 @@ include:
   - ./flaresolverr/docker-compose.yml
   - ./ghostfolio/docker-compose.yml
   - ./glance/docker-compose.yml
-  - ./gluetun/docker-compose.yml
+  # - ./gluetun/docker-compose.yml
   - ./grafana/docker-compose.yml
   - ./homeassistant/docker-compose.yml
   # - ./influxdb/docker-compose.yml
@@ -18,3 +18,4 @@ include:
   - ./radarr/docker-compose.yml
   - ./sonarr/docker-compose.yml
   - ./telegraf/docker-compose.yml
+  - ./util-api/docker-compose.yml

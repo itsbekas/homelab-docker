@@ -7,14 +7,12 @@ services:
       - PGID=1000
       - TZ=Europe/London
       - WEBUI_PORT=6880
-      - TORRENTING_PORT=6881
+      - TORRENTING_PORT=6888
     volumes:
       - /opt/docker/qbittorrent/appdata:/config
       - /data/downloads:/data/downloads
-    # Ports will be handled by gluetun, so they are commented out.
-    # ports:
-    #   - 6880:6880
-    #   - 6881:6881
-    #   - 6881:6881/udp
-    network_mode: "container:gluetun"
+    ports:
+      - 6880:6880
+      - 6888:6888
+      - 6888:6888/udp
     restart: unless-stopped
