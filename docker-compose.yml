@@ -1,13 +1,14 @@
 include:
   - ./actual-budget/docker-compose.yml
   - ./bazarr/docker-compose.yml
+  - ./cross-seed/docker-compose.yml
   - ./donetick/docker-compose.yml
   - ./flaresolverr/docker-compose.yml
   - ./ghostfolio/docker-compose.yml
-  - ./glance/docker-compose.yml
   # - ./gluetun/docker-compose.yml
   - ./grafana/docker-compose.yml
   - ./homeassistant/docker-compose.yml
+  - ./homepage/docker-compose.yml
   # - ./influxdb/docker-compose.yml
   - ./jellyfin/docker-compose.yml
   - ./jellyseerr/docker-compose.yml
