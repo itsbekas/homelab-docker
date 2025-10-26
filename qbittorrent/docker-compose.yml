@@ -16,4 +16,6 @@ services:
       - 6880:6880
       - 6888:6888
       - 6888:6888/udp
+    networks:
+      - media
     restart: unless-stopped

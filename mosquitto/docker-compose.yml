@@ -11,6 +11,8 @@ services:
     user: "1000"
     environment:
       - TZ=Europe/London
+    networks:
+      - monitoring
     restart: unless-stopped
 
 # References

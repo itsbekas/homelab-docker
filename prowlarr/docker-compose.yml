@@ -7,9 +7,9 @@ services:
       - PGID=1000
       - TZ=Europe/London
     volumes:
-      - /opt/docker/prowlarr/data:/config
+      - /opt/docker/prowlarr/config:/config
     ports:
       - 9696:9696
-    dns:
-      - 1.1.1.1
+    networks:
+      - media
     restart: unless-stopped

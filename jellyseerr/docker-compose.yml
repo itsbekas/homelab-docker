@@ -13,4 +13,6 @@ services:
       - 1.1.1.1
     volumes:
       - /opt/docker/jellyseerr/appdata/config:/app/config
+    networks:
+      - media
     restart: unless-stopped

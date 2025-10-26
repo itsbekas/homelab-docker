@@ -11,4 +11,6 @@ services:
       - /data:/data
     ports:
       - 8989:8989
+    networks:
+      - media
     restart: unless-stopped

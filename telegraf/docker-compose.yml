@@ -9,6 +9,8 @@ services:
       - /opt/docker/telegraf/config/telegraf.conf:/etc/telegraf/telegraf.conf:ro
     ports:
       - "9273:9273"
+    networks:
+      - monitoring
     restart: unless-stopped
 
 # References

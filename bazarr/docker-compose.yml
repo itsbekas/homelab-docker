@@ -5,11 +5,12 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
+      - TZ=Europe/London
     volumes:
       - /opt/docker/bazarr/config:/config
-      - /data/media/movies:/movies
-      - /data/media/tv:/tv
+      - /data/media:/data/media
     ports:
       - 6767:6767
+    networks:
+      - media
     restart: unless-stopped

@@ -1,0 +1,10 @@
+services:
+  util-api:
+    build:
+      context: https://${GH_USERNAME}:${GH_PAT}@github.com/itsbekas/util-api.git
+    container_name: util-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    networks:
+      - util

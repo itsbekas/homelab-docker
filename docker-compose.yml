@@ -1,3 +1,17 @@
+networks:
+  media:
+    name: media
+  monitoring:
+    name: monitoring
+  management:
+    name: management
+  automation:
+    name: automation
+  finance:
+    name: finance
+  util:
+    name: util
+
 include:
   - ./actual-budget/docker-compose.yml
   - ./bazarr/docker-compose.yml
