@@ -19,6 +19,10 @@
     recursive: true
     rsync_opts:
       - "--exclude=*.j2"
+      - "--exclude=*.db"
+      - "--exclude=*.db-shm"
+      - "--exclude=*.db-wal"
+      - "--exclude=.env"
 
 - name: Set ownership on compose directory
   ansible.builtin.file:
