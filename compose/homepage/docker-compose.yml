@@ -1,16 +1,12 @@
 services:
   homepage:
-    image: ghcr.io/gethomepage/homepage:latest
+    build:
+      context: https://github.com/itsbekas/homepage.git
+      args:
+        VITE_DONETICK_URL: ${VITE_DONETICK_URL}
+        VITE_DONETICK_API_KEY: ${VITE_DONETICK_API_KEY}
+        VITE_TODOIST_API_TOKEN: ${VITE_TODOIST_API_TOKEN}
     container_name: homepage
-    ports:
-      - 3001:3000
-    volumes:
-      - /opt/docker/homepage/config:/app/config
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - HOMEPAGE_ALLOWED_HOSTS=${HOMEPAGE_ALLOWED_HOSTS}
-      - PUID=1000
-      - PGID=1000
-    networks:
-      - management
     restart: unless-stopped
+    ports:
+      - "3002:3000"
