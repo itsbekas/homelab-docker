@@ -31,5 +31,6 @@ include:
   - ./radarr/docker-compose.yml
   - ./sonarr/docker-compose.yml
   - ./telegraf/docker-compose.yml
-  - ./util-api/docker-compose.yml
+  # TODO: re-enable after updating GH_PAT in vault
+  # - ./util-api/docker-compose.yml
   - ./watchtower/docker-compose.yml
