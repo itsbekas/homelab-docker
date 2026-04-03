@@ -1,0 +1,4 @@
+{{ ansible_managed | comment }}
+{% for key, value in item.value.items() %}
+{{ key }}="{{ value }}"
+{% endfor %}

@@ -1,0 +1,77 @@
+---
+- name: Install Docker packages
+  community.general.pacman:
+    name:
+      - docker
+      - docker-compose
+      - docker-buildx
+    state: present
+
+- name: Add server user to docker group
+  ansible.builtin.user:
+    name: "{{ server_user }}"
+    groups: docker
+    append: true
+
+- name: Create Docker config directory
+  ansible.builtin.file:
+    path: /etc/docker
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Configure Docker daemon
+  ansible.builtin.template:
+    src: daemon.json.j2
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart docker
+
+- name: Enable and start Docker
+  ansible.builtin.systemd:
+    name: docker
+    enabled: true
+    state: started
+
+- name: Create Docker prune systemd service
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/docker-prune.service
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Docker system prune
+
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/bin/docker system prune -af --filter "until=168h"
+  notify: reload systemd
+
+- name: Create Docker prune systemd timer
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/docker-prune.timer
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Run Docker system prune periodically
+
+      [Timer]
+      OnCalendar={{ docker_prune_timer_oncalendar }}
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
+  notify: reload systemd
+
+- name: Enable Docker prune timer
+  ansible.builtin.systemd:
+    name: docker-prune.timer
+    enabled: true
+    state: started
+    daemon_reload: true

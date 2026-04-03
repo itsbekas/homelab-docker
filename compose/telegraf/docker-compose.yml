@@ -5,6 +5,7 @@ services:
     environment:
       - MQTT_USERNAME=${MQTT_USERNAME}
       - MQTT_PASSWORD=${MQTT_PASSWORD}
+      - MQTT_CLIENT_ID=${MQTT_CLIENT_ID}
     volumes:
       - /opt/docker/telegraf/config/telegraf.conf:/etc/telegraf/telegraf.conf:ro
     ports:

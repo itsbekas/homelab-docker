@@ -1,0 +1,20 @@
+---
+server_user: bekas
+server_timezone: Europe/London
+
+system_packages:
+  - base-devel
+  - git
+  - htop
+  - rsync
+  - curl
+  - wget
+  - unzip
+  - jq
+  - nftables
+  - openssh
+
+sshd_port: 22
+sshd_permit_root_login: "no"
+sshd_password_authentication: "no"
+sshd_pubkey_authentication: "yes"

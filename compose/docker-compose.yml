@@ -32,3 +32,4 @@ include:
   - ./sonarr/docker-compose.yml
   - ./telegraf/docker-compose.yml
   - ./util-api/docker-compose.yml
+  - ./watchtower/docker-compose.yml

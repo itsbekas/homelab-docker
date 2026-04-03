@@ -1,0 +1,28 @@
+---
+# ENCRYPT THIS FILE before committing real values:
+#   ansible-vault encrypt ansible/vars/vault.yml
+#
+# To edit later:
+#   ansible-vault edit ansible/vars/vault.yml
+#
+# Only user-provided credentials go here. API keys from *arr services
+# and the Donetick JWT secret are auto-extracted from running services.
+
+# Per-service .env files -- each key is a service directory name,
+# values become KEY="VALUE" lines in that service's .env file.
+vault_service_envs:
+  homepage:
+    VITE_DONETICK_URL: "CHANGEME"            # your Donetick URL
+    VITE_DONETICK_API_KEY: "CHANGEME"        # Donetick API key
+    VITE_TODOIST_API_TOKEN: "CHANGEME"       # Todoist API token
+  telegraf:
+    MQTT_USERNAME: "CHANGEME"                # Mosquitto MQTT credentials
+    MQTT_PASSWORD: "CHANGEME"
+    MQTT_CLIENT_ID: "telegraf-mosquitto"
+  util-api:
+    GH_USERNAME: "CHANGEME"                  # GitHub creds for util-api build
+    GH_PAT: "CHANGEME"
+
+# qBittorrent login (needed by cross-seed to connect)
+vault_qbittorrent_user: "CHANGEME"
+vault_qbittorrent_password: "CHANGEME"

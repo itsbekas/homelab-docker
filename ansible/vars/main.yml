@@ -1,0 +1,30 @@
+---
+server_user: bekas
+server_timezone: Europe/London
+
+compose_src: "{{ playbook_dir }}/../compose"
+compose_dest: /opt/docker
+
+data_dirs:
+  - /data/downloads/books
+  - /data/downloads/movies
+  - /data/downloads/tv
+  - /data/media/books
+  - /data/media/movies
+  - /data/media/tv
+  - /data/cross-seed/links
+  - /data/cross-seed/output
+
+system_packages:
+  - base-devel
+  - git
+  - htop
+  - rsync
+  - curl
+  - wget
+  - unzip
+  - jq
+  - nftables
+  - openssh
+
+docker_prune_timer_oncalendar: "weekly"

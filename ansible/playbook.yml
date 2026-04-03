@@ -1,0 +1,15 @@
+---
+- name: Configure homelab server
+  hosts: localhost
+  become: true
+  vars_files:
+    - vars/main.yml
+    - vars/vault.yml
+
+  roles:
+    - role: system
+      tags: [system]
+    - role: docker
+      tags: [docker]
+    - role: services
+      tags: [services]

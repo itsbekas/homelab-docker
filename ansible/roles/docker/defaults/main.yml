@@ -1,0 +1,11 @@
+---
+server_user: bekas
+
+docker_prune_timer_oncalendar: "weekly"
+
+docker_daemon_config:
+  log-driver: "json-file"
+  log-opts:
+    max-size: "10m"
+    max-file: "3"
+  storage-driver: "overlay2"

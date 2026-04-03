@@ -1,0 +1,46 @@
+---
+- name: Set timezone
+  community.general.timezone:
+    name: "{{ server_timezone }}"
+
+- name: Update package database
+  community.general.pacman:
+    update_cache: true
+
+- name: Install system packages
+  community.general.pacman:
+    name: "{{ system_packages }}"
+    state: present
+
+- name: Configure sshd
+  ansible.builtin.template:
+    src: sshd_config.j2
+    dest: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    mode: "0600"
+    validate: "sshd -t -f %s"
+  notify: restart sshd
+
+- name: Enable and start sshd
+  ansible.builtin.systemd:
+    name: sshd
+    enabled: true
+    state: started
+
+- name: Enable and start nftables
+  ansible.builtin.systemd:
+    name: nftables
+    enabled: true
+    state: started
+
+- name: Configure sysctl for network performance
+  ansible.posix.sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    sysctl_set: true
+    reload: true
+  loop:
+    - { key: "net.core.rmem_max", value: "16777216" }
+    - { key: "net.core.wmem_max", value: "16777216" }
+    - { key: "vm.swappiness", value: "10" }

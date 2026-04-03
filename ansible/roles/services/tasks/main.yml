@@ -1,0 +1,189 @@
+---
+# ==========================================================
+# Phase 1: Deploy -- sync files, start the compose stack
+# ==========================================================
+
+- name: Create compose destination directory
+  ansible.builtin.file:
+    path: "{{ compose_dest }}"
+    state: directory
+    owner: "{{ server_user }}"
+    group: "{{ server_user }}"
+    mode: "0755"
+
+- name: Sync compose files to deployment directory
+  ansible.posix.synchronize:
+    src: "{{ compose_src }}/"
+    dest: "{{ compose_dest }}/"
+    delete: false
+    recursive: true
+    rsync_opts:
+      - "--exclude=*.j2"
+
+- name: Set ownership on compose directory
+  ansible.builtin.file:
+    path: "{{ compose_dest }}"
+    state: directory
+    owner: "{{ server_user }}"
+    group: "{{ server_user }}"
+    recurse: true
+
+- name: Create data directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ server_user }}"
+    group: "{{ server_user }}"
+    mode: "0775"
+  loop: "{{ data_dirs }}"
+
+- name: Template per-service .env files
+  ansible.builtin.template:
+    src: service-env.j2
+    dest: "{{ compose_dest }}/{{ item.key }}/.env"
+    owner: "{{ server_user }}"
+    group: "{{ server_user }}"
+    mode: "0600"
+  loop: "{{ vault_service_envs | dict2items }}"
+  when: vault_service_envs is defined
+
+- name: Pull container images
+  ansible.builtin.command:
+    cmd: docker compose pull
+    chdir: "{{ compose_dest }}"
+  become: true
+  become_user: "{{ server_user }}"
+  register: compose_pull
+  changed_when: "'Pull complete' in compose_pull.stdout or 'Downloaded' in compose_pull.stdout"
+
+- name: Start compose stack
+  ansible.builtin.command:
+    cmd: docker compose up -d --remove-orphans
+    chdir: "{{ compose_dest }}"
+  become: true
+  become_user: "{{ server_user }}"
+  register: compose_up
+  changed_when: "'Started' in compose_up.stderr or 'Creating' in compose_up.stderr"
+
+# ==========================================================
+# Phase 2: Auto-configure -- extract keys from running services
+# ==========================================================
+
+- name: Wait for Prowlarr to write config
+  ansible.builtin.wait_for:
+    path: "{{ compose_dest }}/prowlarr/config/config.xml"
+    timeout: 120
+
+- name: Wait for Sonarr to write config
+  ansible.builtin.wait_for:
+    path: "{{ compose_dest }}/sonarr/data/config.xml"
+    timeout: 120
+
+- name: Wait for Radarr to write config
+  ansible.builtin.wait_for:
+    path: "{{ compose_dest }}/radarr/data/config.xml"
+    timeout: 120
+
+- name: Extract Prowlarr API key
+  ansible.builtin.shell:
+    cmd: grep -oP '<ApiKey>\K[^<]+' "{{ compose_dest }}/prowlarr/config/config.xml"
+  register: prowlarr_key_result
+  changed_when: false
+
+- name: Extract Sonarr API key
+  ansible.builtin.shell:
+    cmd: grep -oP '<ApiKey>\K[^<]+' "{{ compose_dest }}/sonarr/data/config.xml"
+  register: sonarr_key_result
+  changed_when: false
+
+- name: Extract Radarr API key
+  ansible.builtin.shell:
+    cmd: grep -oP '<ApiKey>\K[^<]+' "{{ compose_dest }}/radarr/data/config.xml"
+  register: radarr_key_result
+  changed_when: false
+
+- name: Set extracted API key facts
+  ansible.builtin.set_fact:
+    prowlarr_api_key: "{{ prowlarr_key_result.stdout }}"
+    sonarr_api_key: "{{ sonarr_key_result.stdout }}"
+    radarr_api_key: "{{ radarr_key_result.stdout }}"
+
+- name: Check for existing donetick config
+  ansible.builtin.stat:
+    path: "{{ compose_dest }}/donetick/config/selfhosted.yml"
+  register: donetick_config_stat
+
+- name: Extract existing donetick JWT secret
+  ansible.builtin.command:
+    cmd: >
+      python3 -c "import yaml;
+      d=yaml.safe_load(open('{{ compose_dest }}/donetick/config/selfhosted.yml'));
+      print(d.get('jwt',{}).get('secret',''))"
+  register: existing_jwt_result
+  changed_when: false
+  failed_when: false
+  when: donetick_config_stat.stat.exists
+
+- name: Set donetick JWT secret (reuse existing or generate new)
+  ansible.builtin.set_fact:
+    donetick_jwt_secret: >-
+      {{ existing_jwt_result.stdout
+         if (existing_jwt_result.stdout is defined
+             and existing_jwt_result.stdout | length > 0
+             and existing_jwt_result.stdout != 'DONETICK_JWT_SECRET')
+         else lookup('ansible.builtin.password', '/dev/null length=44 chars=ascii_letters,digits') }}
+
+# ==========================================================
+# Phase 3: Template configs that depend on extracted keys
+# ==========================================================
+
+- name: Ensure cross-seed config directory exists
+  ansible.builtin.file:
+    path: "{{ compose_dest }}/cross-seed/config"
+    state: directory
+    owner: "{{ server_user }}"
+    group: "{{ server_user }}"
+    mode: "0755"
+
+- name: Template cross-seed config
+  ansible.builtin.template:
+    src: cross-seed-config.js.j2
+    dest: "{{ compose_dest }}/cross-seed/config/config.js"
+    owner: "{{ server_user }}"
+    group: "{{ server_user }}"
+    mode: "0644"
+  when: vault_qbittorrent_user != 'CHANGEME'
+  register: cross_seed_config
+
+- name: Ensure donetick config directory exists
+  ansible.builtin.file:
+    path: "{{ compose_dest }}/donetick/config"
+    state: directory
+    owner: "{{ server_user }}"
+    group: "{{ server_user }}"
+    mode: "0755"
+
+- name: Template donetick config
+  ansible.builtin.template:
+    src: donetick-selfhosted.yml.j2
+    dest: "{{ compose_dest }}/donetick/config/selfhosted.yml"
+    owner: "{{ server_user }}"
+    group: "{{ server_user }}"
+    mode: "0644"
+  register: donetick_config
+
+- name: Restart cross-seed if config changed
+  ansible.builtin.command:
+    cmd: docker compose restart cross-seed
+    chdir: "{{ compose_dest }}"
+  become: true
+  become_user: "{{ server_user }}"
+  when: cross_seed_config is changed
+
+- name: Restart donetick if config changed
+  ansible.builtin.command:
+    cmd: docker compose restart donetick
+    chdir: "{{ compose_dest }}"
+  become: true
+  become_user: "{{ server_user }}"
+  when: donetick_config is changed

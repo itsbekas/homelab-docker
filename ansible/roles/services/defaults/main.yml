@@ -1,0 +1,4 @@
+---
+compose_src: "{{ playbook_dir }}/../compose"
+compose_dest: /opt/docker
+server_user: bekas

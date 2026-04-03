@@ -1,0 +1,18 @@
+{{ ansible_managed | comment }}
+
+Port {{ sshd_port }}
+AddressFamily any
+ListenAddress 0.0.0.0
+ListenAddress ::
+
+PermitRootLogin {{ sshd_permit_root_login }}
+PubkeyAuthentication {{ sshd_pubkey_authentication }}
+PasswordAuthentication {{ sshd_password_authentication }}
+ChallengeResponseAuthentication no
+UsePAM yes
+
+X11Forwarding no
+PrintMotd no
+AcceptEnv LANG LC_*
+
+Subsystem sftp /usr/lib/ssh/sftp-server
