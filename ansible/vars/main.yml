@@ -24,7 +24,6 @@ system_packages:
   - wget
   - unzip
   - jq
-  - nftables
   - openssh
 
 docker_prune_timer_oncalendar: "weekly"

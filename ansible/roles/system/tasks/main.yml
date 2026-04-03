@@ -28,12 +28,6 @@
     enabled: true
     state: started
 
-- name: Enable and start nftables
-  ansible.builtin.systemd:
-    name: nftables
-    enabled: true
-    state: started
-
 - name: Configure sysctl for network performance
   ansible.posix.sysctl:
     name: "{{ item.key }}"
