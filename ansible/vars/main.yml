@@ -27,3 +27,6 @@ system_packages:
   - openssh
 
 docker_prune_timer_oncalendar: "weekly"
+
+backup_dir: /opt/backups/docker
+backup_retention_days: 14

@@ -38,3 +38,47 @@
     - { key: "net.core.rmem_max", value: "16777216" }
     - { key: "net.core.wmem_max", value: "16777216" }
     - { key: "vm.swappiness", value: "10" }
+
+# ==========================================================
+# Backups
+# ==========================================================
+
+- name: Create backup directory
+  ansible.builtin.file:
+    path: "{{ backup_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Deploy backup script
+  ansible.builtin.template:
+    src: backup-docker-data.sh.j2
+    dest: "{{ backup_dir }}/backup-docker-data.sh"
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Deploy backup systemd service
+  ansible.builtin.template:
+    src: backup-docker-data.service.j2
+    dest: /etc/systemd/system/backup-docker-data.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: reload systemd
+
+- name: Deploy backup systemd timer
+  ansible.builtin.template:
+    src: backup-docker-data.timer.j2
+    dest: /etc/systemd/system/backup-docker-data.timer
+    owner: root
+    group: root
+    mode: "0644"
+  notify: reload systemd
+
+- name: Enable and start backup timer
+  ansible.builtin.systemd:
+    name: backup-docker-data.timer
+    enabled: true
+    state: started

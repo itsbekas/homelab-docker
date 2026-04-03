@@ -1,0 +1,8 @@
+{{ ansible_managed | comment }}
+[Unit]
+Description=Backup Docker service data
+
+[Service]
+Type=oneshot
+ExecStart={{ backup_dir }}/backup-docker-data.sh
+User=root

@@ -1,0 +1,67 @@
+#!/bin/bash
+{{ ansible_managed | comment }}
+set -euo pipefail
+
+BACKUP_ROOT="{{ backup_dir }}"
+DOCKER_DIR="{{ compose_dest }}"
+TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+DEST="$BACKUP_ROOT/$TIMESTAMP"
+KEEP_DAYS="{{ backup_retention_days }}"
+
+mkdir -p "$DEST"
+
+backup_file() {
+    local src="$1"
+    local rel="${src#$DOCKER_DIR/}"
+    local dest_dir="$DEST/$(dirname "$rel")"
+    if [ -f "$src" ]; then
+        mkdir -p "$dest_dir"
+        cp -a "$src" "$dest_dir/"
+    fi
+}
+
+backup_dir_recursive() {
+    local src="$1"
+    local rel="${src#$DOCKER_DIR/}"
+    if [ -d "$src" ]; then
+        mkdir -p "$DEST/$rel"
+        cp -a "$src/." "$DEST/$rel/"
+    fi
+}
+
+# Databases (SQLite)
+find "$DOCKER_DIR" -maxdepth 4 \( -name "*.db" -o -name "*.db-wal" -o -name "*.db-shm" \) -not -path "*/logs*" | while read -r f; do
+    backup_file "$f"
+done
+
+# Config files (API keys, settings)
+find "$DOCKER_DIR" -maxdepth 3 -name "config.xml" | while read -r f; do
+    backup_file "$f"
+done
+
+# Service-specific configs
+backup_file "$DOCKER_DIR/qbittorrent/appdata/qBittorrent/qBittorrent.conf"
+backup_file "$DOCKER_DIR/qbittorrent/appdata/qBittorrent/categories.json"
+backup_file "$DOCKER_DIR/qbittorrent/appdata/qBittorrent/watched_folders.json"
+backup_dir_recursive "$DOCKER_DIR/qbittorrent/appdata/qBittorrent/BT_backup"
+backup_file "$DOCKER_DIR/homeassistant/config/configuration.yaml"
+backup_file "$DOCKER_DIR/homeassistant/config/secrets.yaml"
+backup_file "$DOCKER_DIR/homeassistant/config/automations.yaml"
+backup_file "$DOCKER_DIR/homeassistant/config/scripts.yaml"
+backup_file "$DOCKER_DIR/homeassistant/config/scenes.yaml"
+backup_dir_recursive "$DOCKER_DIR/homeassistant/config/.storage"
+backup_file "$DOCKER_DIR/donetick/config/selfhosted.yml"
+backup_file "$DOCKER_DIR/cross-seed/config/config.js"
+backup_file "$DOCKER_DIR/prometheus/config/prometheus.yml"
+backup_dir_recursive "$DOCKER_DIR/grafana/data"
+
+# .env files
+find "$DOCKER_DIR" -maxdepth 2 -name ".env" | while read -r f; do
+    backup_file "$f"
+done
+
+# Prune old backups
+find "$BACKUP_ROOT" -maxdepth 1 -mindepth 1 -type d -mtime +$KEEP_DAYS -exec rm -rf {} \;
+
+echo "Backup completed: $DEST"
+du -sh "$DEST"
