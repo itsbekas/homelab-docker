@@ -1,6 +1,6 @@
 ---
 server_user: bekas
-server_timezone: Europe/London
+server_timezone: Europe/Lisbon
 
 compose_src: "{{ playbook_dir }}/../compose"
 compose_dest: /opt/docker
